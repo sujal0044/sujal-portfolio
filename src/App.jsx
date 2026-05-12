@@ -5,8 +5,110 @@ import { Github, Instagram, Volume2, VolumeX, Mail, Code, Terminal, Layers, Exte
 const abstractCoreImg = "https://images.unsplash.com/photo-1614729939124-03290b56c9ce?q=80&w=2500&auto=format&fit=crop";
 const mindsetBg = "https://images.unsplash.com/photo-1550751827-4bd374c3f58b?q=80&w=2000&auto=format&fit=crop";
 
+// --- OPTIMIZED NEURAL NETWORK (Option 1 Brought Back) ---
+const NeuralNetwork = () => {
+  const canvasRef = useRef(null);
+
+  useEffect(() => {
+    const canvas = canvasRef.current;
+    const ctx = canvas.getContext('2d');
+    let width = window.innerWidth;
+    let height = window.innerHeight;
+    canvas.width = width;
+    canvas.height = height;
+
+    let particles = [];
+    const isMobile = width < 768;
+    // OPTIMIZATION: Cut particle count down to prevent lag
+    const particleCount = isMobile ? 15 : 35; 
+    const connectionDistance = 150;
+    let mouse = { x: -1000, y: -1000 };
+
+    for (let i = 0; i < particleCount; i++) {
+      particles.push({
+        x: Math.random() * width,
+        y: Math.random() * height,
+        vx: (Math.random() - 0.5) * 0.5,
+        vy: (Math.random() - 0.5) * 0.5,
+        radius: Math.random() * 1.5 + 0.5
+      });
+    }
+
+    const handleMouseMove = (e) => { mouse.x = e.clientX; mouse.y = e.clientY; };
+    const handleMouseOut = () => { mouse.x = -1000; mouse.y = -1000; };
+    if (!isMobile) { 
+      window.addEventListener('mousemove', handleMouseMove, { passive: true });
+      window.addEventListener('mouseout', handleMouseOut);
+    }
+
+    const animate = () => {
+      ctx.clearRect(0, 0, width, height);
+      
+      for (let i = 0; i < particleCount; i++) {
+        let p = particles[i];
+        p.x += p.vx;
+        p.y += p.vy;
+
+        if (p.x < 0 || p.x > width) p.vx *= -1;
+        if (p.y < 0 || p.y > height) p.vy *= -1;
+
+        ctx.beginPath();
+        ctx.arc(p.x, p.y, p.radius, 0, Math.PI * 2);
+        ctx.fillStyle = 'rgba(255, 106, 0, 0.2)';
+        ctx.fill();
+
+        for (let j = i + 1; j < particleCount; j++) {
+          let p2 = particles[j];
+          let dist = Math.sqrt(Math.pow(p.x - p2.x, 2) + Math.pow(p.y - p2.y, 2));
+          if (dist < connectionDistance) {
+            ctx.beginPath();
+            ctx.moveTo(p.x, p.y);
+            ctx.lineTo(p2.x, p2.y);
+            ctx.strokeStyle = `rgba(255, 106, 0, ${0.1 - dist / connectionDistance * 0.1})`;
+            ctx.lineWidth = 0.5;
+            ctx.stroke();
+          }
+        }
+        
+        if (!isMobile) { 
+            let mouseDist = Math.sqrt(Math.pow(p.x - mouse.x, 2) + Math.pow(p.y - mouse.y, 2));
+            if (mouseDist < 200) {
+              ctx.beginPath();
+              ctx.moveTo(p.x, p.y);
+              ctx.lineTo(mouse.x, mouse.y);
+              ctx.strokeStyle = `rgba(255, 106, 0, ${0.15 - mouseDist / 200 * 0.15})`;
+              ctx.lineWidth = 1;
+              ctx.stroke();
+            }
+        }
+      }
+      requestAnimationFrame(animate);
+    };
+
+    animate();
+
+    const handleResize = () => {
+      width = window.innerWidth;
+      height = window.innerHeight;
+      canvas.width = width;
+      canvas.height = height;
+    };
+    window.addEventListener('resize', handleResize);
+
+    return () => {
+      if (!isMobile) {
+        window.removeEventListener('mousemove', handleMouseMove);
+        window.removeEventListener('mouseout', handleMouseOut);
+      }
+      window.removeEventListener('resize', handleResize);
+    };
+  }, []);
+
+  return <canvas ref={canvasRef} className="fixed inset-0 pointer-events-none z-0 opacity-40 mix-blend-screen" />;
+};
+
+
 // --- TRUE MAGNIFYING GLASS TEXT ENGINE ---
-// This splits text into individual words so ONLY the word under the cursor bulges
 const MagText = ({ text }) => {
   return text.split(' ').map((word, i) => (
     <span 
@@ -40,7 +142,7 @@ const TiltCard = ({ children, className }) => {
   );
 };
 
-// --- LIGHTWEIGHT SVG PRELOADER ---
+// --- SVG PRELOADER ---
 const ChipPreloader = () => {
   const draw = {
     hidden: { pathLength: 0, opacity: 0 },
@@ -77,19 +179,15 @@ export default function App() {
     const handleMouseMove = (e) => {
       if (!cursorRef.current) return;
       
-      // 144Hz direct DOM injection
       cursorRef.current.style.transform = `translate3d(${e.clientX}px, ${e.clientY}px, 0)`;
 
-      // Detect hover over our new split words
       const target = e.target;
       const isHovering = target.closest('.lens-trigger') || target.closest('a') || target.closest('button');
       
       if (isHovering) {
-        // Expands into a glass lens
         cursorRef.current.classList.add('w-24', 'h-24', '-ml-12', '-mt-12', 'backdrop-blur-[2px]', 'bg-white/5', 'border-2', 'border-[#ff6a00]/40', 'shadow-[0_0_20px_rgba(255,106,0,0.2)]');
         cursorRef.current.classList.remove('w-4', 'h-4', '-ml-2', '-mt-2', 'bg-white', 'mix-blend-difference');
       } else {
-        // Shrinks back to a sharp dot
         cursorRef.current.classList.add('w-4', 'h-4', '-ml-2', '-mt-2', 'bg-white', 'mix-blend-difference');
         cursorRef.current.classList.remove('w-24', 'h-24', '-ml-12', '-mt-12', 'backdrop-blur-[2px]', 'bg-white/5', 'border-2', 'border-[#ff6a00]/40', 'shadow-[0_0_20px_rgba(255,106,0,0.2)]');
       }
@@ -130,6 +228,9 @@ export default function App() {
 
       {!loading && (
         <>
+          {/* BRINGING BACK THE NEURAL NETWORK */}
+          <NeuralNetwork />
+
           {/* NAVIGATION */}
           <nav className="fixed top-0 left-0 w-full p-6 md:p-10 flex justify-between items-center z-50 pointer-events-none">
             <motion.div initial={{ opacity: 0, y: -20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.2 }} className="font-bold text-xl tracking-tighter pointer-events-auto lens-trigger cursor-none hover:text-[#ff6a00] transition-colors">
@@ -246,6 +347,23 @@ export default function App() {
               </div>
             </section>
 
+            {/* STATS */}
+            <section className="grid grid-cols-2 md:grid-cols-4 gap-6 text-center">
+               {[
+                 { num: "3+", label: "AI/ML Certifications" },
+                 { num: "50+", label: "Projects Deployed" },
+                 { num: "2026", label: "Master's Graduation" },
+                 { num: "100%", label: "Calm Under Pressure" }
+               ].map((stat, i) => (
+                 <TiltCard key={i}>
+                   <div className="bg-[#0a0a0a] border border-[#222] p-8 rounded-2xl cursor-none hover:bg-[#111] transition-colors text-magnify">
+                     <div className="text-4xl md:text-5xl font-black text-[#ff6a00] mb-2">{stat.num}</div>
+                     <div className="text-xs text-gray-400 uppercase tracking-widest">{stat.label}</div>
+                   </div>
+                 </TiltCard>
+               ))}
+            </section>
+
             {/* CONTACT */}
             <section className="text-center pt-20 pb-20">
                <TiltCard>
@@ -253,19 +371,6 @@ export default function App() {
                    <div className="absolute inset-0 bg-gradient-to-t from-[#ff6a00]/5 to-transparent opacity-50" />
                    
                    <h2 className="text-5xl md:text-8xl font-black tracking-tighter mb-6 relative z-10 text-white lens-trigger">
-                     INITIATE <br/><span className="text-[#ff6a00]">SEQUENCE.</span>
-                   </h2>
-                   
-                   <a href="mailto:sa.tech080044@gmail.com" className="cursor-none relative z-10 inline-flex items-center gap-4 px-12 py-6 mt-10 bg-white text-black font-bold rounded-full hover:bg-[#ff6a00] hover:text-white transition-all duration-300 hover:scale-105 tracking-widest uppercase text-sm shadow-[0_0_20px_rgba(255,255,255,0.2)] hover:shadow-[0_0_30px_rgba(255,106,0,0.6)]">
-                     <Mail size={20} /> Contact Me
-                   </a>
-                 </div>
-               </TiltCard>
-            </section>
-
-          </div>
-        </>
-      )}
-    </div>
+                     INIT
   );
 }
