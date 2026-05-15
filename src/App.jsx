@@ -4,13 +4,15 @@ import { Github, Instagram, Volume2, VolumeX, Mail, Code, Terminal, Layers, Exte
 
 const abstractCoreImg = "https://images.unsplash.com/photo-1614729939124-03290b56c9ce?q=80&w=2500&auto=format&fit=crop";
 const mindsetBg = "https://images.unsplash.com/photo-1550751827-4bd374c3f58b?q=80&w=2000&auto=format&fit=crop";
+const worksBg = "https://images.unsplash.com/photo-1518770660439-4636190af475?q=80&w=2000&auto=format&fit=crop";
+const contactBg = "https://images.unsplash.com/photo-1451187580459-43490279c0fa?q=80&w=2000&auto=format&fit=crop";
 
-// --- LIGHTWEIGHT TILT (Reduced Math) ---
+// --- PERFORMANCE OPTIMIZED 3D TILT ---
 const TiltCard = ({ children, className }) => {
   const x = useMotionValue(0);
   const y = useMotionValue(0);
-  const rotateX = useTransform(y, [-100, 100], [2, -2]); 
-  const rotateY = useTransform(x, [-100, 100], [-2, 2]);
+  const rotateX = useTransform(y, [-100, 100], [4, -4]); 
+  const rotateY = useTransform(x, [-100, 100], [-4, 4]);
 
   function handleMouse(event) {
     const rect = event.currentTarget.getBoundingClientRect();
@@ -25,21 +27,21 @@ const TiltCard = ({ children, className }) => {
       onMouseLeave={() => { x.set(0); y.set(0); }}
       className={className}
     >
-      <motion.div style={{ rotateX, rotateY, transformStyle: "preserve-3d" }} className="w-full h-full will-change-transform">
+      <motion.div style={{ rotateX, rotateY, transformStyle: "preserve-3d" }} className="w-full h-full">
         {children}
       </motion.div>
     </motion.div>
   );
 };
 
-// --- LIGHTWEIGHT SVG PRELOADER ---
+// --- OPTIMIZED SVG PRELOADER ---
 const ChipPreloader = () => {
   const draw = {
     hidden: { pathLength: 0, opacity: 0 },
     visible: (i) => ({
       pathLength: 1,
       opacity: 1,
-      transition: { pathLength: { delay: i * 0.2, duration: 1 }, opacity: { delay: i * 0.2, duration: 0.2 } }
+      transition: { pathLength: { delay: i * 0.2, duration: 1.5 }, opacity: { delay: i * 0.2, duration: 0.2 } }
     })
   };
 
@@ -56,8 +58,14 @@ const ChipPreloader = () => {
         ))}
         <motion.rect x="20" y="20" width="60" height="60" rx="4" stroke="#ff6a00" strokeWidth="2.5" fill="none" variants={draw} custom={2} initial="hidden" animate="visible" />
         <motion.rect x="24" y="24" width="52" height="52" rx="2" stroke="#ff6a00" strokeWidth="1" strokeDasharray="2 2" fill="none" variants={draw} custom={3} initial="hidden" animate="visible" />
-        <motion.rect x="32" y="32" width="36" height="36" rx="3" fill="#ff6a00" initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 1.5, duration: 0.5 }} />
-        <motion.text x="50" y="55" textAnchor="middle" fill="#050505" fontSize="18" fontWeight="900" fontFamily="sans-serif" initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 2, duration: 0.5 }}>
+        <motion.rect 
+          x="32" y="32" width="36" height="36" rx="3" fill="#ff6a00"
+          initial={{ opacity: 0 }} animate={{ opacity: [0, 0.8, 1] }} transition={{ delay: 2, duration: 1 }}
+        />
+        <motion.text 
+          x="50" y="55" textAnchor="middle" fill="#050505" fontSize="18" fontWeight="900" fontFamily="sans-serif"
+          initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 2.5, duration: 0.5 }}
+        >
           SP
         </motion.text>
       </svg>
@@ -71,30 +79,35 @@ export default function App() {
   const [isDesktop, setIsDesktop] = useState(true);
   const audioRef = useRef(null);
 
-  // LIGHTWEIGHT CURSOR PHYSICS (Lower Stiffness/Damping)
+  // OPTIMIZED CURSOR PHYSICS
   const mouseX = useMotionValue(-100);
   const mouseY = useMotionValue(-100);
-  const dotX = useSpring(mouseX, { stiffness: 500, damping: 20 });
-  const dotY = useSpring(mouseY, { stiffness: 500, damping: 20 });
+  const dotX = useSpring(mouseX, { stiffness: 800, damping: 30 });
+  const dotY = useSpring(mouseY, { stiffness: 800, damping: 30 });
+  const ringX = useSpring(mouseX, { stiffness: 150, damping: 20 });
+  const ringY = useSpring(mouseY, { stiffness: 150, damping: 20 });
 
   useEffect(() => {
     const mql = window.matchMedia('(pointer: fine)');
+    const handleDeviceChange = (e) => setIsDesktop(e.matches);
     setIsDesktop(mql.matches); 
+    mql.addEventListener('change', handleDeviceChange);
     
     const handleMouseMove = (e) => {
       mouseX.set(e.clientX);
       mouseY.set(e.clientY);
     };
     
-    if (mql.matches) window.addEventListener('mousemove', handleMouseMove, { passive: true });
+    if (mql.matches) window.addEventListener('mousemove', handleMouseMove);
     
     return () => {
+      mql.removeEventListener('change', handleDeviceChange);
       if (mql.matches) window.removeEventListener('mousemove', handleMouseMove);
     };
   }, [mouseX, mouseY]);
 
   useEffect(() => {
-    setTimeout(() => setLoading(false), 3000); 
+    setTimeout(() => setLoading(false), 3800); 
   }, []);
 
   const toggleMusic = () => {
@@ -110,9 +123,12 @@ export default function App() {
   return (
     <div className={`bg-[#050505] text-white min-h-screen font-sans overflow-x-hidden selection:bg-[#ff6a00] selection:text-white relative ${isDesktop ? 'cursor-none' : ''}`}>
       
-      {/* PERFORMANCE CURSOR (1 Layer Only) */}
+      {/* PERFORMANCE CURSOR (No Blend Modes) */}
       {isDesktop && (
-        <motion.div className="fixed top-0 left-0 w-8 h-8 border-2 border-[#ff6a00] rounded-full pointer-events-none z-[999] -translate-x-1/2 -translate-y-1/2 will-change-transform" style={{ x: dotX, y: dotY }} />
+        <>
+          <motion.div className="fixed top-0 left-0 w-[6px] h-[6px] bg-[#ff6a00] rounded-full pointer-events-none z-[999] -translate-x-1/2 -translate-y-1/2" style={{ x: dotX, y: dotY }} />
+          <motion.div className="fixed top-0 left-0 w-10 h-10 border border-[#ff6a00]/50 rounded-full pointer-events-none z-[998] -translate-x-1/2 -translate-y-1/2" style={{ x: ringX, y: ringY }} />
+        </>
       )}
 
       <audio ref={audioRef} loop src="https://cdn.pixabay.com/download/audio/2022/11/22/audio_febc508520.mp3?filename=cinematic-time-lapse-115672.mp3" />
@@ -120,7 +136,10 @@ export default function App() {
       {/* PRELOADER */}
       <AnimatePresence>
         {loading && (
-          <motion.div initial={{ opacity: 1 }} exit={{ opacity: 0 }} transition={{ duration: 0.5 }} className="fixed inset-0 z-[200] flex items-center justify-center bg-[#050505]">
+          <motion.div 
+            initial={{ opacity: 1 }} exit={{ opacity: 0, scale: 1.1 }} transition={{ duration: 0.8 }}
+            className="fixed inset-0 z-[200] flex items-center justify-center bg-[#050505]"
+          >
             <ChipPreloader />
           </motion.div>
         )}
@@ -133,7 +152,7 @@ export default function App() {
             <motion.div initial={{ opacity: 0, y: -20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.2 }} className="font-bold text-xl tracking-tighter pointer-events-auto cursor-none">
               SUJAL<span className="text-[#ff6a00]">.</span>
             </motion.div>
-            <motion.button initial={{ opacity: 0, y: -20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.2 }} onClick={toggleMusic} className="pointer-events-auto cursor-none px-4 py-2 bg-[#111] border border-white/10 rounded-full hover:bg-white/10 transition flex items-center gap-2 text-xs font-bold uppercase tracking-widest text-[#ff6a00]">
+            <motion.button initial={{ opacity: 0, y: -20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.2 }} onClick={toggleMusic} className="pointer-events-auto cursor-none px-4 py-2 glass-card rounded-full hover:bg-white/10 transition flex items-center gap-2 text-xs font-bold uppercase tracking-widest text-[#ff6a00]">
               {isMuted ? <VolumeX size={16} /> : <Volume2 size={16} />}
               {isMuted ? 'Sound Off' : 'Sound On'}
             </motion.button>
@@ -141,14 +160,16 @@ export default function App() {
 
           {/* 1. LAG-FREE HERO SECTION */}
           <section className="relative min-h-screen flex items-center justify-center pt-20 px-6 overflow-hidden">
+            
             <div className="absolute inset-0 z-0 bg-[#050505]">
-               {/* Static Opacity Background, No mix-blend-screen */}
+               {/* Static Background Image (No Blur/Scale animations) */}
                <motion.img 
                  src={abstractCoreImg} alt="AI Core" 
-                 initial={{ opacity: 0 }} animate={{ opacity: 0.15 }} transition={{ duration: 1.5 }}
+                 initial={{ opacity: 0 }} animate={{ opacity: 0.2 }} transition={{ duration: 2 }}
                  className="w-full h-full object-cover"
                />
-               <div className="absolute inset-0 bg-gradient-to-t from-[#050505] via-transparent to-[#050505]"></div>
+               {/* CSS Gradient (Replaces heavy animated orbs) */}
+               <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,_var(--tw-gradient-stops))] from-[#ff6a00]/10 via-[#050505]/80 to-[#050505]"></div>
             </div>
 
             <div className="relative z-10 text-center max-w-5xl mt-10">
@@ -164,12 +185,16 @@ export default function App() {
             </div>
           </section>
 
-          <div className="max-w-7xl mx-auto px-6 space-y-32 pb-40 relative z-10">
+          <div className="max-w-7xl mx-auto px-6 space-y-40 pb-40 relative z-10">
             
-            {/* 2. THE MINDSET (Solid Matte Backgrounds) */}
+            {/* 2. THE MINDSET */}
             <section className="pt-20 relative">
+              <motion.img 
+                src={mindsetBg} initial={{ opacity: 0 }} whileInView={{ opacity: 0.15 }} transition={{ duration: 1.5 }} viewport={{ once: true }}
+                className="absolute inset-0 w-full h-full object-cover -z-10 rounded-3xl"
+              />
               <TiltCard>
-                <div className="bg-[#0a0a0a] border border-[#222] p-12 md:p-24 rounded-3xl relative overflow-hidden transition-all duration-300 hover:border-[#ff6a00]/30 shadow-2xl">
+                <div className="glass-card p-12 md:p-24 rounded-3xl relative overflow-hidden group border border-white/5 hover:border-[#ff6a00]/20 transition-all duration-700 bg-black/40">
                   <div className="relative z-20">
                     <h2 className="text-4xl md:text-6xl font-black mb-10 tracking-tight">The <span className="text-[#ff6a00]">Mindset.</span></h2>
                     <div className="grid md:grid-cols-2 gap-12 text-gray-300 text-lg leading-relaxed font-light">
@@ -191,7 +216,7 @@ export default function App() {
                    { title: "AI & Creative", skills: "Machine Learning • Deep Learning • Motion Graphics • UI/UX" }
                  ].map((box, i) => (
                    <TiltCard key={i} className="h-full">
-                     <div className="bg-[#0a0a0a] border border-[#222] p-10 rounded-2xl h-full hover:border-[#ff6a00]/50 transition-colors cursor-none">
+                     <div className="glass-card p-10 rounded-2xl h-full border-t border-white/5 hover:border-[#ff6a00]/50 transition-colors cursor-none bg-black/40">
                        <h3 className="text-xl font-bold mb-4 text-white relative z-10">{box.title}</h3>
                        <p className="text-[#ff6a00] font-mono text-sm leading-loose relative z-10">{box.skills}</p>
                      </div>
@@ -201,17 +226,21 @@ export default function App() {
             </section>
 
             {/* 4. SELECTED WORKS */}
-            <section>
+            <section className="relative">
+              <motion.img 
+                src={worksBg} initial={{ opacity: 0 }} whileInView={{ opacity: 0.1 }} transition={{ duration: 1.5 }} viewport={{ once: true }}
+                className="absolute inset-0 w-full h-full object-cover -z-10 rounded-3xl"
+              />
               <h2 className="text-3xl font-bold mb-12 flex items-center gap-4"><Layers className="text-[#ff6a00]" /> Selected Works</h2>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
                 {[
                   { name: "AI Resume Analyzer", tech: "Python • NLP • React", desc: "An intelligent platform that parses and scores resumes against job descriptions using machine learning." },
                   { name: "Smart Cloud Dashboard", tech: "Next.js • AWS • Tailwind", desc: "A cinematic, data-heavy dashboard monitoring real-time cloud server metrics and analytics." },
                   { name: "AI Productivity Assistant", tech: "OpenAI API • Node.js", desc: "A personalized AI agent designed to automate daily workflows and task management." },
-                  { name: "Cinematic Portfolio", tech: "React • Framer Motion", desc: "Award-winning, high-performance portfolio templates featuring fast routing and optimized UI." }
+                  { name: "Cinematic Portfolio", tech: "React • Framer Motion", desc: "Award-winning, high-performance portfolio templates featuring 3D routing and optimized physics." }
                 ].map((project, i) => (
                   <TiltCard key={i}>
-                    <div className="bg-[#0a0a0a] border border-[#222] p-10 rounded-3xl h-full hover:border-[#ff6a00]/40 transition-all cursor-none group">
+                    <div className="glass-card p-10 rounded-3xl h-full border border-white/5 hover:border-[#ff6a00]/40 transition-all cursor-none group bg-black/40">
                       <div className="flex justify-between items-start mb-6">
                         <h3 className="text-2xl font-bold text-white group-hover:text-[#ff6a00] transition-colors">{project.name}</h3>
                         <ExternalLink size={20} className="text-gray-600 group-hover:text-[#ff6a00] transition-colors" />
@@ -229,16 +258,16 @@ export default function App() {
               <h2 className="text-3xl font-bold mb-12 flex items-center gap-4"><Terminal className="text-[#ff6a00]" /> Operational Experience</h2>
               <div className="space-y-6">
                 {[
-                  { role: "Frontend Developer Intern", company: "TechNova Solutions", year: "2024 - Present", desc: "Engineered scalable React architectures, implemented global state management, and optimized UI rendering." },
-                  { role: "Freelance Creative Developer", company: "Independent", year: "2023 - 2024", desc: "Architected modern web experiences, integrating headless CMS and secure Firebase authentication." }
+                  { role: "Frontend Developer Intern", company: "TechNova Solutions", year: "2024 - Present", desc: "Engineered scalable React architectures, implemented global state management, and optimized UI rendering performance metrics." },
+                  { role: "Freelance Creative Developer", company: "Independent", year: "2023 - 2024", desc: "Architected modern web experiences, integrating headless CMS, secure Firebase authentication, and fast Framer animations." }
                 ].map((exp, i) => (
-                   <div key={i} className="bg-[#0a0a0a] border border-[#222] p-8 rounded-2xl flex flex-col md:flex-row justify-between items-start md:items-center group cursor-none hover:border-[#ff6a00]/30 transition-all">
+                  <motion.div key={i} whileHover={{ x: 10 }} className="glass-card p-8 rounded-2xl flex flex-col md:flex-row justify-between items-start md:items-center group cursor-none border border-white/5 hover:border-[#ff6a00]/30 transition-all bg-black/40">
                      <div className="max-w-2xl">
                        <h3 className="text-2xl font-bold group-hover:text-[#ff6a00] transition-colors">{exp.role}</h3>
                        <p className="text-gray-500 mt-2"><span className="text-white font-semibold">{exp.company}</span> • {exp.desc}</p>
                      </div>
-                     <div className="text-[#ff6a00] font-mono mt-4 md:mt-0 opacity-80 bg-[#ff6a00]/10 px-4 py-2 rounded-lg">{exp.year}</div>
-                  </div>
+                     <div className="text-[#ff6a00] font-mono mt-4 md:mt-0 opacity-60 bg-[#ff6a00]/5 px-4 py-2 rounded-lg">{exp.year}</div>
+                  </motion.div>
                 ))}
               </div>
             </section>
@@ -252,7 +281,7 @@ export default function App() {
                  { num: "100%", label: "Calm Under Pressure" }
                ].map((stat, i) => (
                  <TiltCard key={i}>
-                   <div className="bg-[#0a0a0a] border border-[#222] p-8 rounded-2xl cursor-none hover:bg-[#111] transition-colors">
+                   <div className="glass-card p-8 rounded-2xl cursor-none hover:bg-white/5 transition-colors bg-black/40">
                      <div className="text-4xl md:text-5xl font-black text-[#ff6a00] mb-2">{stat.num}</div>
                      <div className="text-xs text-gray-400 uppercase tracking-widest">{stat.label}</div>
                    </div>
@@ -261,10 +290,14 @@ export default function App() {
             </section>
 
             {/* 7. CONTACT */}
-            <section className="text-center pt-20">
+            <section className="text-center pt-20 relative">
+               <motion.img 
+                src={contactBg} initial={{ opacity: 0 }} whileInView={{ opacity: 0.2 }} transition={{ duration: 1.5 }} viewport={{ once: true }}
+                className="absolute inset-0 w-full h-full object-cover -z-10 rounded-[4rem]"
+               />
                <TiltCard>
-                 <div className="bg-[#0a0a0a] border border-[#222] p-16 md:p-32 rounded-[4rem] relative overflow-hidden cursor-none hover:border-[#ff6a00]/40 transition-all duration-300 shadow-2xl">
-                   <div className="absolute inset-0 bg-gradient-to-t from-[#ff6a00]/5 to-transparent opacity-50" />
+                 <div className="glass-card p-16 md:p-32 rounded-[4rem] relative overflow-hidden cursor-none border border-white/10 hover:border-[#ff6a00]/40 transition-all duration-700 bg-black/60 shadow-2xl">
+                   <div className="absolute inset-0 bg-gradient-to-t from-[#ff6a00]/10 to-transparent opacity-50" />
                    
                    <h2 className="text-5xl md:text-8xl font-black tracking-tighter mb-6 relative z-10 text-white">
                      INITIATE <br/><span className="text-transparent bg-clip-text bg-gradient-to-r from-[#ff6a00] to-yellow-500">SEQUENCE.</span>
